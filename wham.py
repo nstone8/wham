@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,tol=1E-12):
+def createFiles(dataPath:str,savePath:str,winSize:int,num_bins:int,temp:float,k:float,tol=1E-12):
     """dataPath: Path to data .csv file
     savePath: Path to new directory to store output
     winSize: number of points in each umbrella
@@ -35,7 +35,7 @@ def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,tol=1E-
         umbrellaIndex+=1
         thisSegmentFile=open(thisSegmentFileName,'w')
         #loc_win_min should be the mean of the zPos for this window
-        loc_win_min=np.mean(thisSegment.ind)
+        loc_win_min=np.mean(thisSegment.zSensr)
         metadata.write('{0}\t{1}\t{2}\n'.format(thisSegmentFileName,loc_win_min,k))
         #format data such that each line has the 'time' (data point number) and ind separated by a tab
         formattedSegmentData=('{0}\t{1}\n'.format(line[0],line.ind) for linenum,line in thisSegment.iterrows())
@@ -45,6 +45,6 @@ def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,tol=1E-
         if this_hist_max>hist_max:
             hist_max=this_hist_max
     metadata.close()
-    whamCommand='wham {hist_min} {hist_max} {num_bins} {tol} {temperature} {numpad} {metadatafile} {freefile}'.format(hist_min=hist_min,hist_max=hist_max,num_bins=umbrellaIndex,tol=tol,temperature=temp,numpad=0,metadatafile=metadataFileName,freefile=os.path.join(savePath,'results.txt'))
+    whamCommand='wham {hist_min} {hist_max} {num_bins} {tol} {temperature} {numpad} {metadatafile} {freefile}'.format(hist_min=hist_min,hist_max=hist_max,num_bins=num_bins,tol=tol,temperature=temp,numpad=0,metadatafile=metadataFileName,freefile=os.path.join(savePath,'results.txt'))
     print(whamCommand)
         
