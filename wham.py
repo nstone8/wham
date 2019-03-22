@@ -1,10 +1,12 @@
 import os
 import pandas as pd
 import numpy as np
-def createFiles(dataPath:str,savePath:str,winSize:int,num_bins:int,temp:float,k:float,tol=1E-12):
+import math
+def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,bin_width:float=.05,tol=1E-12):
     """dataPath: Path to data .csv file
     savePath: Path to new directory to store output
     winSize: number of points in each umbrella
+    bin_width: width of bins in nm
     temp: Reaction temperature
     k: spring constant in N/m"""
     #k should have units of kJ/(mol*nm^2)
@@ -45,6 +47,6 @@ def createFiles(dataPath:str,savePath:str,winSize:int,num_bins:int,temp:float,k:
         if this_hist_max>hist_max:
             hist_max=this_hist_max
     metadata.close()
-    whamCommand='wham {hist_min} {hist_max} {num_bins} {tol} {temperature} {numpad} {metadatafile} {freefile}'.format(hist_min=hist_min,hist_max=hist_max,num_bins=num_bins,tol=tol,temperature=temp,numpad=0,metadatafile=metadataFileName,freefile=os.path.join(savePath,'results.txt'))
+    whamCommand='wham {hist_min} {hist_max} {num_bins} {tol} {temperature} {numpad} {metadatafile} {freefile}'.format(hist_min=hist_min,hist_max=hist_max,num_bins=math.ceil((hist_max-hist_min)/bin_width),tol=tol,temperature=temp,numpad=0,metadatafile=metadataFileName,freefile=os.path.join(savePath,'results.txt'))
     print(whamCommand)
         
