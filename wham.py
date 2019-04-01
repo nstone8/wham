@@ -2,6 +2,9 @@ import os
 import pandas as pd
 import numpy as np
 import math
+import io
+from matplotlib import pyplot as plt
+
 def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,bin_width:float=.05,tol=1E-12):
     """dataPath: Path to data .csv file
     savePath: Path to new directory to store output
@@ -50,3 +53,19 @@ def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,bin_wid
     whamCommand='wham {hist_min} {hist_max} {num_bins} {tol} {temperature} {numpad} {metadatafile} {freefile}'.format(hist_min=hist_min,hist_max=hist_max,num_bins=math.ceil((hist_max-hist_min)/bin_width),tol=tol,temperature=temp,numpad=0,metadatafile=metadataFileName,freefile=os.path.join(savePath,'results.txt'))
     print(whamCommand)
         
+def plotResults(resultPath:str):
+    buf=io.StringIO()
+    resultFile=open(resultPath)
+    hashCount=0
+    while True:
+        thisLine=resultFile.readline()
+        if thisLine[0]=='#':
+            hashCount+=1
+        if hashCount>1:
+            break
+        buf.write(thisLine)
+    resultFile.close()
+    buf.seek(0)
+    resultsFrame=pd.read_csv(buf,sep='\t')
+    plt.plot(resultsFrame.iloc[:,0],resultsFrame.iloc[:,1])
+    plt.show()
