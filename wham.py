@@ -53,10 +53,15 @@ def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,bin_wid
     whamCommand='wham {hist_min} {hist_max} {num_bins} {tol} {temperature} {numpad} {metadatafile} {freefile}'.format(hist_min=hist_min,hist_max=hist_max,num_bins=math.ceil((hist_max-hist_min)/bin_width),tol=tol,temperature=temp,numpad=0,metadatafile=metadataFileName,freefile=os.path.join(savePath,'results.txt'))
     print(whamCommand)
         
-def plotResults(resultPath:str):
+def plotResults(resultPath:str,style='point'):
     buf=io.StringIO()
     resultFile=open(resultPath)
     hashCount=0
+    fmtString=''
+    if style=='point':
+        fmtString='.'
+    elif style=='line':
+        fmtString='-'
     while True:
         thisLine=resultFile.readline()
         if thisLine[0]=='#':
@@ -67,5 +72,5 @@ def plotResults(resultPath:str):
     resultFile.close()
     buf.seek(0)
     resultsFrame=pd.read_csv(buf,sep='\t')
-    plt.plot(resultsFrame.iloc[:,0],resultsFrame.iloc[:,1])
+    plt.plot(resultsFrame.iloc[:,0],resultsFrame.iloc[:,1],fmtString)
     plt.show()
