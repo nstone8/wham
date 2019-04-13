@@ -4,6 +4,7 @@ import numpy as np
 import math
 import io
 from matplotlib import pyplot as plt
+import scipy.special
 
 def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,bin_width:float=.05,tol=1E-12):
     """dataPath: Path to data .csv file
@@ -54,14 +55,19 @@ def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,bin_wid
     print(whamCommand)
         
 def plotResults(resultPath:str,style='point'):
-    buf=io.StringIO()
-    resultFile=open(resultPath)
-    hashCount=0
+    resultsFrame=loadResults(resultPath)
     fmtString=''
     if style=='point':
         fmtString='.'
     elif style=='line':
         fmtString='-'
+    plt.plot(resultsFrame.iloc[:,0],resultsFrame.iloc[:,1],fmtString)
+    plt.show()
+
+def loadResults(resPath:str)->pd.DataFrame:
+    buf=io.StringIO()
+    resultFile=open(resPath)
+    hashCount=0
     while True:
         thisLine=resultFile.readline()
         if thisLine[0]=='#':
@@ -72,5 +78,47 @@ def plotResults(resultPath:str,style='point'):
     resultFile.close()
     buf.seek(0)
     resultsFrame=pd.read_csv(buf,sep='\t')
-    plt.plot(resultsFrame.iloc[:,0],resultsFrame.iloc[:,1],fmtString)
+    return resultsFrame
+
+def multiSigmoid(zpos,*args)->'list':
+    '''returns the sum of multiple sigmoids for values of zpos
+    Parameters:
+    zpos: series of values to calculate the sum of sigmoids over
+    args: a series of n depth values, n widths and n centers, where n is the number of sigmoids'''
+    if len(args)%3 != 0:
+        raise Exception('The number of arguments must be a multiple of 3')
+    nSigmoids=int(len(args)/3)
+    depths=args[:nSigmoids]
+    widths=args[nSigmoids:2*nSigmoids]
+    centers=args[2*nSigmoids:]
+    energies=[]
+    for z in zpos:
+        thisEnergy=0
+        for d,w,c in zip(depths,widths,centers):
+            thisEnergy+=-1*d*(scipy.special.expit((1/w)*(z-c))-1)
+        energies.append(thisEnergy)
+    return energies
+        
+        
+    
+
+def fitLandscape(landscape:str,smooth:int=5):
+    data=loadResults(landscape)
+    zpos=data.iloc[:,0]
+    en=data.iloc[:,1]
+    enSmoothed=[]
+    dSmooth=int((smooth-1)/2)
+    zposSmoothed=[]
+    for j in range(dSmooth,len(en)-dSmooth-1):
+        enSmoothed.append(np.mean(en[j-dSmooth:j+dSmooth+1]))
+        zposSmoothed.append(zpos[j])
+    ddEn=[] #second derivative of energy
+    ddZpos=[]
+    for i in range(1,len(enSmoothed)-1): #calculate second derivative of energy-ish
+        ddEn.append(enSmoothed[i+1]-(2*enSmoothed[i])+enSmoothed[i-1])
+        ddZpos.append(zposSmoothed[i])
+    fig,axes=plt.subplots(nrows=1,ncols=3,sharex=True)
+    axes[0].plot(zpos,en)
+    axes[1].plot(zposSmoothed,enSmoothed)
+    axes[2].plot(ddZpos,ddEn)
     plt.show()
