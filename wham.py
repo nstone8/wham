@@ -99,7 +99,24 @@ def multiSigmoid(zpos,*args)->'list':
         energies.append(thisEnergy)
     return energies
         
-        
+def multiTanh(zpos,*args)->'list':
+    '''returns the sum of multiple hyperbolic tangent sigmoids for values of zpos
+    Parameters:
+    zpos: series of values to calculate the sum of sigmoids over
+    args: a series of n depth values, n widths and n centers, where n is the number of sigmoids'''
+    if len(args)%3 != 0:
+        raise Exception('The number of arguments must be a multiple of 3')
+    nSigmoids=int(len(args)/3)
+    depths=args[:nSigmoids]
+    widths=args[nSigmoids:2*nSigmoids]
+    centers=args[2*nSigmoids:]
+    energies=[]
+    for z in zpos:
+        thisEnergy=0
+        for d,w,c in zip(depths,widths,centers):
+            thisEnergy+=-0.5*d*(np.tanh((1/w)*(z-c))-1)
+        energies.append(thisEnergy)
+    return energies        
     
 
 def fitLandscape(landscape:str,smooth:int=5):
