@@ -52,8 +52,11 @@ def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,bin_wid
             hist_max=this_hist_max
     metadata.close()
     whamCommand='wham {hist_min} {hist_max} {num_bins} {tol} {temperature} {numpad} {metadatafile} {freefile}'.format(hist_min=hist_min,hist_max=hist_max,num_bins=math.ceil((hist_max-hist_min)/bin_width),tol=tol,temperature=temp,numpad=0,metadatafile=metadataFileName,freefile=os.path.join(savePath,'results.txt'))
+    cmdFile=open(os.path.join(savePath,'command.txt'),'w')
+    cmdFile.write(whamCommand)
+    cmdFile.close()
     print(whamCommand)
-        
+
 def plotResults(resultPath:str,style='point'):
     resultsFrame=loadResults(resultPath)
     fmtString=''
@@ -98,7 +101,7 @@ def multiSigmoid(zpos,*args)->'list':
             thisEnergy+=-1*d*(scipy.special.expit((1/w)*(z-c))-1)
         energies.append(thisEnergy)
     return energies
-        
+
 def multiTanh(zpos,*args)->'list':
     '''returns the sum of multiple hyperbolic tangent sigmoids for values of zpos
     Parameters:
@@ -116,8 +119,8 @@ def multiTanh(zpos,*args)->'list':
         for d,w,c in zip(depths,widths,centers):
             thisEnergy+=-0.5*d*(np.tanh((1/w)*(z-c))-1)
         energies.append(thisEnergy)
-    return energies        
-    
+    return energies
+
 
 def fitLandscape(landscape:str,smooth:int=5):
     data=loadResults(landscape)
