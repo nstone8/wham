@@ -56,6 +56,7 @@ def createFiles(dataPath:str,savePath:str,winSize:int,temp:float,k:float,bin_wid
     cmdFile.write(whamCommand)
     cmdFile.close()
     print(whamCommand)
+    return whamCommand
 
 def plotResults(resultPath:str,style='point'):
     resultsFrame=loadResults(resultPath)
